@@ -2,10 +2,14 @@ import {ui} from './ui';
 import {RectangleCollections} from './geoms/RectangleCollection';
 import {Render} from './render';
 import {Rectangle} from './geoms/Rectangle';
+import {UserActions} from './user-actions';
+import {Reactions} from './reaction';
 
 function main() {
   const rectangleCollection = new RectangleCollections();
-  const render = new Render(rectangleCollection);
+  const userReaction = new UserActions(rectangleCollection);
+  const reactions = new Reactions(rectangleCollection, userReaction);
+  const render = new Render(rectangleCollection, userReaction);
 
   ui.addButton.addEventListener('click', () => {
     rectangleCollection.push(
@@ -19,7 +23,7 @@ function main() {
   });
 
   ui.deleteButton.addEventListener('click', () => {
-    render.clear();
+    render.destruct();
   });
 }
 

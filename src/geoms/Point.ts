@@ -1,13 +1,25 @@
-import {ReactiveGeometry} from './ReactiveGeometry';
+import {IReactiveGeometry, ReactiveGeometry} from './ReactiveGeometry';
 
-interface IPoint {
+interface IPoint extends IReactiveGeometry {
   id: number;
   coord: [number, number];
+  selected: boolean;
+  hovered: boolean;
 }
 
 export class Point extends ReactiveGeometry<IPoint> implements IPoint {
   constructor(private _coord: [number, number]) {
     super();
+  }
+
+  snapshot(): IPoint {
+    console.log('point-snapshot');
+    return {
+      id: this.id,
+      coord: [...this._coord],
+      selected: this._selected,
+      hovered: this._hovered,
+    };
   }
 
   get coord(): [number, number] {
@@ -16,6 +28,6 @@ export class Point extends ReactiveGeometry<IPoint> implements IPoint {
 
   set coord(coord: [number, number]) {
     this._coord = [...coord];
-    this._notify({id: this.id, coord: [...coord]});
+    this._observable.notify(this.snapshot());
   }
 }
