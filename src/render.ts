@@ -33,9 +33,7 @@ export class Render {
   private _render = () => {
     const ctx = this._ui.canvas.getContext('2d');
     ctx.clearRect(0, 0, this._ui.canvas.width, this._ui.canvas.height);
-
     this._rectangleCollection.collection.forEach(this._rectangleRender(ctx));
-
     for (let point of pointIterator(this._rectangleCollection)) {
       this._pointRender(ctx)(point);
     }
@@ -68,6 +66,7 @@ export class Render {
   };
 
   destruct() {
+    // todo тут где-то баг
     const ctx = this._ui.canvas.getContext('2d');
     ctx.clearRect(0, 0, this._ui.canvas.width, this._ui.canvas.height);
     this._rectangleCollection.collection = [];

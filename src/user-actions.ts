@@ -22,12 +22,19 @@ export type MoveAction = {
 
 // todo вычисления в webworker?
 export class UserActions {
-  private _hoveredObservable = new Observable<HoveredAction>();
+  private _clickPoint?: Coord;
   private _hoveredPoint?: Point;
   private _hoveredRectangle?: Rectangle;
 
   private _movedObservable = new Observable<MoveAction>();
-  private _clickPoint?: Coord;
+  moveSubscribe(cb: (value: MoveAction) => void) {
+    this._movedObservable.subscribe(cb);
+  }
+
+  private _hoveredObservable = new Observable<HoveredAction>();
+  hoveredSubscribe(cb: (value: HoveredAction) => void) {
+    this._hoveredObservable.subscribe(cb);
+  }
 
   constructor(private _geomCollection: RectangleCollections, private _reactionArea = ui.canvas) {
     this._reactionArea.addEventListener('mousemove', this._hoveredPointListener);
@@ -38,10 +45,6 @@ export class UserActions {
 
     this._reactionArea.addEventListener('mousedown', ({x, y}) => (this._clickPoint = [x, y]));
     this._reactionArea.addEventListener('mouseup', () => (this._clickPoint = undefined));
-  }
-
-  hoveredSubscribe(cb: (value: HoveredAction) => void) {
-    this._hoveredObservable.subscribe(cb);
   }
 
   private _hoveredPointListener = ({x, y}: MouseEvent) => {
@@ -87,10 +90,6 @@ export class UserActions {
       this._hoveredRectangle = undefined;
     }
   };
-
-  moveSubscribe(cb: (value: MoveAction) => void) {
-    this._movedObservable.subscribe(cb);
-  }
 
   private _pointMoveListener = (ev: MouseEvent) => {
     if (this._clickPoint === undefined || this._hoveredPoint === undefined) {
