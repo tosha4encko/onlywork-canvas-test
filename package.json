@@ -4,7 +4,8 @@
   "description": "",
   "main": "dist/main.ts",
   "scripts": {
-    "watch": "webpack --watch --mode=development"
+    "watch": "webpack --watch --mode=development",
+    "build": "webpack"
   },
   "author": "tosha4encko",
   "license": "ISC",
