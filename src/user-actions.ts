@@ -20,7 +20,6 @@ export type MoveAction = {
   moveCoord: Coord;
 };
 
-// todo вычисления в webworker?
 export class UserActions {
   private _clickPoint?: Coord;
   private _hoveredPoint?: Point;
