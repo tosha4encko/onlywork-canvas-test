@@ -36,7 +36,6 @@ export class Render {
 
     ctx.beginPath();
     this._rectangleCollection.collection.forEach(this._rectangleRender(ctx));
-    ctx.closePath();
     ctx.stroke();
 
     ctx.beginPath();
@@ -48,15 +47,14 @@ export class Render {
 
   private _rectangleRender = (ctx: CanvasRenderingContext2D) => (rectangle: Rectangle) => {
     ctx.strokeStyle = getColor(rectangle);
-
     const [first, ...other] = rectangle.points;
     const [x0, y0] = first.coord;
     ctx.moveTo(x0, y0);
-
     other.forEach((point) => {
       const [x0, y0] = point.coord;
       ctx.lineTo(x0, y0);
     });
+    ctx.closePath();
   };
 
   private _pointRender = (ctx: CanvasRenderingContext2D) => (point: Point) => {

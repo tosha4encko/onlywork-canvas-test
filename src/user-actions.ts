@@ -44,15 +44,23 @@ export class UserActions {
   }
 
   private _hoveredListener = ({x, y}: MouseEvent) => {
-    const hoveredPoint = find(pointIterator(this._geomCollection), ({coord}) => equelPoints(coord, [x, y]));
-    if (hoveredPoint && hoveredPoint !== this._hoveredGeom) {
-      this._hoveredObservable.notify({geom: hoveredPoint, hovered: true});
-      this._hoveredGeom = hoveredPoint;
+    if (this._clickPoint !== undefined) {
+      return;
     }
 
-    if (this._hoveredGeom && hoveredPoint === undefined) {
+    const hoveredPoint = find(pointIterator(this._geomCollection), ({coord}) => equelPoints(coord, [x, y]));
+    if (hoveredPoint === this._hoveredGeom) {
+      return;
+    }
+
+    if (this._hoveredGeom) {
       this._hoveredObservable.notify({geom: this._hoveredGeom, hovered: false});
       this._hoveredGeom = undefined;
+    }
+
+    if (hoveredPoint) {
+      this._hoveredObservable.notify({geom: hoveredPoint, hovered: true});
+      this._hoveredGeom = hoveredPoint;
     }
   };
 
