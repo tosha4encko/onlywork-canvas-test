@@ -34,36 +34,37 @@ export class Render {
     const ctx = this._ui.canvas.getContext('2d');
     ctx.clearRect(0, 0, this._ui.canvas.width, this._ui.canvas.height);
 
-    ctx.beginPath();
     this._rectangleCollection.collection.forEach(this._rectangleRender(ctx));
-    ctx.stroke();
 
-    ctx.beginPath();
     for (let point of pointIterator(this._rectangleCollection)) {
       this._pointRender(ctx)(point);
     }
-    ctx.fill();
   };
 
   private _rectangleRender = (ctx: CanvasRenderingContext2D) => (rectangle: Rectangle) => {
-    ctx.strokeStyle = getColor(rectangle);
     const [first, ...other] = rectangle.points;
     const [x0, y0] = first.coord;
+
+    ctx.beginPath();
+    ctx.strokeStyle = getColor(rectangle);
     ctx.moveTo(x0, y0);
     other.forEach((point) => {
       const [x0, y0] = point.coord;
       ctx.lineTo(x0, y0);
     });
+
     ctx.closePath();
+    ctx.stroke();
   };
 
   private _pointRender = (ctx: CanvasRenderingContext2D) => (point: Point) => {
     if (!point.selected && !point.hovered) {
       return;
     }
-
+    ctx.beginPath();
     ctx.fillStyle = getColor(point);
     ctx.arc(...point.coord, POINT_SIZE, 0, 2 * Math.PI, true);
+    ctx.fill();
   };
 
   destruct() {

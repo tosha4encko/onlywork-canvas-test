@@ -30,9 +30,11 @@ export class UserActions {
   private _clickPoint?: Coord;
 
   constructor(private _geomCollection: RectangleCollections, private _reactionArea = ui.canvas) {
-    this._reactionArea.addEventListener('mousemove', this._hoveredListener);
+    this._reactionArea.addEventListener('mousemove', this._hoveredPointListener);
     this._reactionArea.addEventListener('mousemove', this._pointMoveListener);
+
     this._reactionArea.addEventListener('mousemove', this._hoverRectangleListener);
+    this._reactionArea.addEventListener('mousemove', this._rectangleMoveListener);
 
     this._reactionArea.addEventListener('mousedown', ({x, y}) => (this._clickPoint = [x, y]));
     this._reactionArea.addEventListener('mouseup', () => (this._clickPoint = undefined));
@@ -42,7 +44,7 @@ export class UserActions {
     this._hoveredObservable.subscribe(cb);
   }
 
-  private _hoveredListener = ({x, y}: MouseEvent) => {
+  private _hoveredPointListener = ({x, y}: MouseEvent) => {
     if (this._clickPoint !== undefined) {
       return;
     }
@@ -64,20 +66,20 @@ export class UserActions {
     // todo разбить и упростить
     for (let rectangle of this._geomCollection.collection) {
       const center = getCenter(rectangle);
-      const isInside = ever(edgeIterator(rectangle), (edge) => {
-        const s = sign;
-        return sign([x, y], edge) === sign(center, edge);
-      });
+      const isInside = ever(edgeIterator(rectangle), (edge) => sign([x, y], edge) === sign(center, edge));
 
-      if (isInside) {
-        if (this._hoveredRectangle) {
-          this._hoveredObservable.notify({geom: this._hoveredRectangle, hovered: false});
-          this._hoveredRectangle = undefined;
-        }
-        this._hoveredObservable.notify({geom: rectangle, hovered: true});
-        this._hoveredRectangle = rectangle;
-        return;
+      if (!isInside) {
+        continue;
       }
+
+      if (this._hoveredRectangle) {
+        this._hoveredObservable.notify({geom: this._hoveredRectangle, hovered: false});
+        this._hoveredRectangle = undefined;
+      }
+
+      this._hoveredObservable.notify({geom: rectangle, hovered: true});
+      this._hoveredRectangle = rectangle;
+      return;
     }
 
     if (this._hoveredRectangle) {
@@ -86,7 +88,7 @@ export class UserActions {
     }
   };
 
-  pointMoveSubscribe(cb: (value: MoveAction) => void) {
+  moveSubscribe(cb: (value: MoveAction) => void) {
     this._movedObservable.subscribe(cb);
   }
 
@@ -101,6 +103,22 @@ export class UserActions {
 
     this._movedObservable.notify({
       geom: this._hoveredPoint,
+      moveCoord: [x - x0, y - y0],
+    });
+  };
+
+  // todo объединить с _pointMoveListener
+  private _rectangleMoveListener = (ev: MouseEvent) => {
+    if (this._clickPoint === undefined || this._hoveredRectangle === undefined) {
+      return;
+    }
+
+    const {x: x0, y: y0} = ev;
+    const [x, y] = this._clickPoint;
+    this._clickPoint = [x0, y0];
+
+    this._movedObservable.notify({
+      geom: this._hoveredRectangle,
       moveCoord: [x - x0, y - y0],
     });
   };
