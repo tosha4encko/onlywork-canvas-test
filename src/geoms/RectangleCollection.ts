@@ -31,7 +31,6 @@ export class RectangleCollections extends ReactiveGeometry<IRectangleCollections
   }
 
   snapshot(): IRectangleCollections {
-    console.log('collection-snapshot');
     return {
       id: this.id,
       collection: [...this._collection],

@@ -70,5 +70,6 @@ export class Render {
     const ctx = this._ui.canvas.getContext('2d');
     ctx.clearRect(0, 0, this._ui.canvas.width, this._ui.canvas.height);
     this._subscribers.forEach((subscriber) => subscriber.unsubscribe());
+    this._rectangleCollection.collection = [];
   }
 }

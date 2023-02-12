@@ -20,7 +20,7 @@ export class Observable<T> {
   }
 }
 
-const DEBOUNCE_TIME = 100;
+const DEBOUNCE_TIME = 1;
 export function debounce<T>(cb: (value: T) => void) {
   let lock = false;
   return (value: T) => {

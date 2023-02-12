@@ -22,7 +22,6 @@ export class Reactions {
     const [xM, yM] = moveCoord;
     if (geom instanceof Point) {
       const [x0, y0] = geom.coord;
-      // todo плавность
       geom.coord = [x0 - xM, y0 - yM];
     }
   };

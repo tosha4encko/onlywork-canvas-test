@@ -4,7 +4,7 @@ import {find, pointIterator} from './geoms/iterators';
 import {Observable} from './observable';
 import {IReactiveGeometry} from './geoms/ReactiveGeometry';
 
-const EPS = 10;
+const EPS = 5;
 //todo каррирование?
 function equelPoints([x1, y1]: [number, number], [x2, y2]: [number, number]) {
   return Math.abs(x1 - x2) < EPS && Math.abs(y1 - y2) < EPS;

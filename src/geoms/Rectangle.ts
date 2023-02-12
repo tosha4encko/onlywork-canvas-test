@@ -30,7 +30,6 @@ export class Rectangle extends ReactiveGeometry<IRectangle> implements IRectangl
   }
 
   snapshot(): IRectangle {
-    console.log('rectangle-snapshot');
     return {
       id: this.id,
       points: [...this._points],

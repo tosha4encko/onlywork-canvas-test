@@ -18,7 +18,7 @@ export abstract class ReactiveGeometry<T extends IReactiveGeometry> {
     return this._observable.subscribe(cb);
   }
 
-  // todo найти лучшее мето для debounce
+  // todo найти лучшее место для debounce
   debouncedNotify = debounce(() => this._observable.notify(this.snapshot()));
 
   protected _selected = false;
