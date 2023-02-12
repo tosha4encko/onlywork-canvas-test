@@ -1,6 +1,7 @@
 import {Rectangle} from './Rectangle';
 import {IReactiveGeometry, ReactiveGeometry} from './ReactiveGeometry';
 import {Subscriber} from '../observable';
+import {Coord} from './Point';
 
 interface IRectangleCollections extends IReactiveGeometry {
   id: number;
@@ -17,9 +18,9 @@ export class RectangleCollections extends ReactiveGeometry<IRectangleCollections
   private _collection: Rectangle[];
   private _subscribers: Subscriber[] = [];
 
-  constructor(collection?: [number, number][][]);
+  constructor(collection?: Coord[][]);
   constructor(collection?: Rectangle[]);
-  constructor(collection: Rectangle[] | [number, number][][] = []) {
+  constructor(collection: Rectangle[] | Coord[][] = []) {
     super();
     if (isRectangleList(collection)) {
       this._collection = [...collection];

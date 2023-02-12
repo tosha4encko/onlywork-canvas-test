@@ -1,14 +1,11 @@
 import {ui} from './ui';
 import {RectangleCollections} from './geoms/RectangleCollection';
-import {find, pointIterator} from './geoms/iterators';
+import {edgeIterator, find, pointIterator, ever} from './geoms/iterators';
 import {Observable} from './observable';
 import {IReactiveGeometry} from './geoms/ReactiveGeometry';
-
-const EPS = 5;
-//todo каррирование?
-function equelPoints([x1, y1]: [number, number], [x2, y2]: [number, number]) {
-  return Math.abs(x1 - x2) < EPS && Math.abs(y1 - y2) < EPS;
-}
+import {equelPoints, getCenter, sign} from './geoms/utils';
+import {Coord, Point} from './geoms/Point';
+import {Rectangle} from './geoms/Rectangle';
 
 export type SelectAction = {
   geom: IReactiveGeometry;
@@ -20,20 +17,22 @@ export type HoveredAction = {
 };
 export type MoveAction = {
   geom: IReactiveGeometry;
-  moveCoord: [number, number];
+  moveCoord: Coord;
 };
 
 // todo вычисления в webworker?
 export class UserActions {
   private _hoveredObservable = new Observable<HoveredAction>();
-  private _hoveredGeom?: IReactiveGeometry;
+  private _hoveredPoint?: Point;
+  private _hoveredRectangle?: Rectangle;
 
   private _movedObservable = new Observable<MoveAction>();
-  private _clickPoint?: [number, number];
+  private _clickPoint?: Coord;
 
   constructor(private _geomCollection: RectangleCollections, private _reactionArea = ui.canvas) {
     this._reactionArea.addEventListener('mousemove', this._hoveredListener);
     this._reactionArea.addEventListener('mousemove', this._pointMoveListener);
+    this._reactionArea.addEventListener('mousemove', this._hoverRectangleListener);
 
     this._reactionArea.addEventListener('mousedown', ({x, y}) => (this._clickPoint = [x, y]));
     this._reactionArea.addEventListener('mouseup', () => (this._clickPoint = undefined));
@@ -47,20 +46,43 @@ export class UserActions {
     if (this._clickPoint !== undefined) {
       return;
     }
-
     const hoveredPoint = find(pointIterator(this._geomCollection), ({coord}) => equelPoints(coord, [x, y]));
-    if (hoveredPoint === this._hoveredGeom) {
+    if (hoveredPoint === this._hoveredPoint) {
       return;
     }
-
-    if (this._hoveredGeom) {
-      this._hoveredObservable.notify({geom: this._hoveredGeom, hovered: false});
-      this._hoveredGeom = undefined;
+    if (this._hoveredPoint) {
+      this._hoveredObservable.notify({geom: this._hoveredPoint, hovered: false});
+      this._hoveredPoint = undefined;
     }
-
     if (hoveredPoint) {
       this._hoveredObservable.notify({geom: hoveredPoint, hovered: true});
-      this._hoveredGeom = hoveredPoint;
+      this._hoveredPoint = hoveredPoint;
+    }
+  };
+
+  private _hoverRectangleListener = ({x, y}: MouseEvent) => {
+    // todo разбить и упростить
+    for (let rectangle of this._geomCollection.collection) {
+      const center = getCenter(rectangle);
+      const isInside = ever(edgeIterator(rectangle), (edge) => {
+        const s = sign;
+        return sign([x, y], edge) === sign(center, edge);
+      });
+
+      if (isInside) {
+        if (this._hoveredRectangle) {
+          this._hoveredObservable.notify({geom: this._hoveredRectangle, hovered: false});
+          this._hoveredRectangle = undefined;
+        }
+        this._hoveredObservable.notify({geom: rectangle, hovered: true});
+        this._hoveredRectangle = rectangle;
+        return;
+      }
+    }
+
+    if (this._hoveredRectangle) {
+      this._hoveredObservable.notify({geom: this._hoveredRectangle, hovered: false});
+      this._hoveredRectangle = undefined;
     }
   };
 
@@ -69,7 +91,7 @@ export class UserActions {
   }
 
   private _pointMoveListener = (ev: MouseEvent) => {
-    if (this._clickPoint === undefined || this._hoveredGeom === undefined) {
+    if (this._clickPoint === undefined || this._hoveredPoint === undefined) {
       return;
     }
 
@@ -78,7 +100,7 @@ export class UserActions {
     this._clickPoint = [x0, y0];
 
     this._movedObservable.notify({
-      geom: this._hoveredGeom,
+      geom: this._hoveredPoint,
       moveCoord: [x - x0, y - y0],
     });
   };

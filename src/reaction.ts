@@ -1,7 +1,7 @@
 // todo объединить с UserActions?
 import {RectangleCollections} from './geoms/RectangleCollection';
 import {Rectangle} from './geoms/Rectangle';
-import {Point} from './geoms/Point';
+import {Coord, Point} from './geoms/Point';
 import {HoveredAction, MoveAction, SelectAction, UserActions} from './user-actions';
 
 export class Reactions {
@@ -26,7 +26,7 @@ export class Reactions {
     }
   };
 
-  private _rectangleMove = (rectangle: Rectangle, moveCoord: [number, number]) => {
+  private _rectangleMove = (rectangle: Rectangle, moveCoord: Coord) => {
     const [xM, yM] = moveCoord;
     rectangle.points.forEach((point) => {
       const [x0, y0] = point.coord;

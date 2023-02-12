@@ -1,10 +1,11 @@
 import {IReactiveGeometry, ReactiveGeometry} from './ReactiveGeometry';
-import {Point} from './Point';
+import {Coord, Point} from './Point';
 import {Subscriber} from '../observable';
 
 function isPointsList(value: any[]): value is Point[] {
   return value.every((v) => v instanceof Point);
 }
+
 interface IRectangle extends IReactiveGeometry {
   id: number;
   points: Point[];
@@ -16,9 +17,9 @@ export class Rectangle extends ReactiveGeometry<IRectangle> implements IRectangl
   private _points: Point[];
   private _subscribers: Subscriber[] = [];
 
-  constructor(points: [number, number][]);
+  constructor(points: Coord[]);
   constructor(points: Point[]);
-  constructor(points: Point[] | [number, number][]) {
+  constructor(points: Point[] | Coord[]) {
     super();
     if (isPointsList(points)) {
       this._points = [...points];
