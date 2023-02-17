@@ -1,6 +1,6 @@
 import {ui} from './ui';
 import {RectangleCollections} from './geoms/RectangleCollection';
-import {Observable} from './observable';
+import {debounce, Observable} from './observable';
 import {IReactiveGeometry} from './geoms/ReactiveGeometry';
 import {Coord} from './geoms/Point';
 import {getIntersectionGeom} from 'geom-utils/intersection';
@@ -33,8 +33,8 @@ export class UserActions {
   }
 
   constructor(private _geomCollection: RectangleCollections, private _reactionArea = ui.canvas) {
-    this._reactionArea.addEventListener('mousemove', this._hoveredListener);
-    this._reactionArea.addEventListener('mousemove', this._moveListener);
+    this._reactionArea.addEventListener('mousemove', debounce(this._hoveredListener));
+    this._reactionArea.addEventListener('mousemove', debounce(this._moveListener));
 
     this._reactionArea.addEventListener('mousedown', ({x, y}) => (this._clickPoint = [x, y]));
     this._reactionArea.addEventListener('mouseup', () => (this._clickPoint = undefined));
