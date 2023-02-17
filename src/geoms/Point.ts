@@ -14,7 +14,6 @@ export class Point extends ReactiveGeometry<IPoint> implements IPoint {
   }
 
   snapshot(): IPoint {
-    console.log('point-snapshot');
     return {
       id: this.id,
       coord: [...this._coord],
