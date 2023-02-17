@@ -1,11 +1,9 @@
 import {ui} from './ui';
 import {RectangleCollections} from './geoms/RectangleCollection';
-import {edgeIterator, find, pointIterator, ever} from './geoms/iterators';
 import {Observable} from './observable';
 import {IReactiveGeometry} from './geoms/ReactiveGeometry';
-import {equelPoints, getCenter, sign} from './geoms/utils';
-import {Coord, Point} from './geoms/Point';
-import {Rectangle} from './geoms/Rectangle';
+import {Coord} from './geoms/Point';
+import {getIntersectionGeom} from 'geom-utils/intersection';
 
 export type SelectAction = {
   geom: IReactiveGeometry;
@@ -22,8 +20,7 @@ export type MoveAction = {
 
 export class UserActions {
   private _clickPoint?: Coord;
-  private _hoveredPoint?: Point;
-  private _hoveredRectangle?: Rectangle;
+  private _activeGeom?: IReactiveGeometry;
 
   private _movedObservable = new Observable<MoveAction>();
   moveSubscribe(cb: (value: MoveAction) => void) {
@@ -36,62 +33,33 @@ export class UserActions {
   }
 
   constructor(private _geomCollection: RectangleCollections, private _reactionArea = ui.canvas) {
-    this._reactionArea.addEventListener('mousemove', this._hoveredPointListener);
-    this._reactionArea.addEventListener('mousemove', this._pointMoveListener);
-
-    this._reactionArea.addEventListener('mousemove', this._hoverRectangleListener);
-    this._reactionArea.addEventListener('mousemove', this._rectangleMoveListener);
+    this._reactionArea.addEventListener('mousemove', this._hoveredListener);
+    this._reactionArea.addEventListener('mousemove', this._moveListener);
 
     this._reactionArea.addEventListener('mousedown', ({x, y}) => (this._clickPoint = [x, y]));
     this._reactionArea.addEventListener('mouseup', () => (this._clickPoint = undefined));
   }
 
-  private _hoveredPointListener = ({x, y}: MouseEvent) => {
+  private _hoveredListener = ({x, y}: MouseEvent) => {
     if (this._clickPoint !== undefined) {
       return;
     }
-    const hoveredPoint = find(pointIterator(this._geomCollection), ({coord}) => equelPoints(coord, [x, y]));
-    if (hoveredPoint === this._hoveredPoint) {
+    const activeGeom = getIntersectionGeom(this._geomCollection, [x, y]);
+    if (activeGeom === this._activeGeom) {
       return;
     }
-    if (this._hoveredPoint) {
-      this._hoveredObservable.notify({geom: this._hoveredPoint, hovered: false});
-      this._hoveredPoint = undefined;
+    if (this._activeGeom) {
+      this._hoveredObservable.notify({geom: this._activeGeom, hovered: false});
+      this._activeGeom = undefined;
     }
-    if (hoveredPoint) {
-      this._hoveredObservable.notify({geom: hoveredPoint, hovered: true});
-      this._hoveredPoint = hoveredPoint;
+    if (activeGeom) {
+      this._hoveredObservable.notify({geom: activeGeom, hovered: true});
+      this._activeGeom = activeGeom;
     }
   };
 
-  private _hoverRectangleListener = ({x, y}: MouseEvent) => {
-    // todo разбить и упростить
-    for (let rectangle of this._geomCollection.collection) {
-      const center = getCenter(rectangle);
-      const isInside = ever(edgeIterator(rectangle), (edge) => sign([x, y], edge) === sign(center, edge));
-
-      if (!isInside) {
-        continue;
-      }
-
-      if (this._hoveredRectangle) {
-        this._hoveredObservable.notify({geom: this._hoveredRectangle, hovered: false});
-        this._hoveredRectangle = undefined;
-      }
-
-      this._hoveredObservable.notify({geom: rectangle, hovered: true});
-      this._hoveredRectangle = rectangle;
-      return;
-    }
-
-    if (this._hoveredRectangle) {
-      this._hoveredObservable.notify({geom: this._hoveredRectangle, hovered: false});
-      this._hoveredRectangle = undefined;
-    }
-  };
-
-  private _pointMoveListener = (ev: MouseEvent) => {
-    if (this._clickPoint === undefined || this._hoveredPoint === undefined) {
+  private _moveListener = (ev: MouseEvent) => {
+    if (this._clickPoint === undefined || this._activeGeom === undefined) {
       return;
     }
 
@@ -100,23 +68,7 @@ export class UserActions {
     this._clickPoint = [x0, y0];
 
     this._movedObservable.notify({
-      geom: this._hoveredPoint,
-      moveCoord: [x - x0, y - y0],
-    });
-  };
-
-  // todo объединить с _pointMoveListener
-  private _rectangleMoveListener = (ev: MouseEvent) => {
-    if (this._clickPoint === undefined || this._hoveredRectangle === undefined) {
-      return;
-    }
-
-    const {x: x0, y: y0} = ev;
-    const [x, y] = this._clickPoint;
-    this._clickPoint = [x0, y0];
-
-    this._movedObservable.notify({
-      geom: this._hoveredRectangle,
+      geom: this._activeGeom,
       moveCoord: [x - x0, y - y0],
     });
   };

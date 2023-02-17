@@ -1,11 +1,11 @@
 import {ui} from './ui';
-import {RectangleCollections} from './geoms/RectangleCollection';
+import {RectangleCollections} from 'geoms/RectangleCollection';
 import {Subscriber} from './observable';
-import {Point} from './geoms/Point';
+import {Point} from 'geoms/Point';
 import {UserActions} from './user-actions';
-import {pointIterator} from './geoms/iterators';
-import {Rectangle} from './geoms/Rectangle';
-import {IReactiveGeometry} from './geoms/ReactiveGeometry';
+import {pointIterator} from 'geom-utils/iterators';
+import {Rectangle} from 'geoms/Rectangle';
+import {IReactiveGeometry} from 'geoms/ReactiveGeometry';
 
 const POINT_SIZE = 5;
 
