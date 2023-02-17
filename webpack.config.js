@@ -5,6 +5,7 @@ module.exports = {
   entry: './src/index.ts',
   resolve: {
     extensions: ['.ts', '.js'],
+    modules: ['./src'],
   },
   devtool: 'inline-source-map',
   module: {
