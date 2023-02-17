@@ -20,7 +20,7 @@ export class Observable<T> {
   }
 }
 
-const DEBOUNCE_TIME = 1;
+window.DEBOUNCE_TIME = 1;
 export function debounce<T>(cb: (value: T) => void) {
   let lock = false;
   return (value: T) => {
@@ -32,6 +32,6 @@ export function debounce<T>(cb: (value: T) => void) {
     setTimeout(() => {
       cb(value);
       lock = false;
-    }, DEBOUNCE_TIME);
+    }, window.DEBOUNCE_TIME);
   };
 }

@@ -5,6 +5,12 @@ import {Rectangle} from './geoms/Rectangle';
 import {UserActions} from './user-actions';
 import {Reactions} from './reaction';
 
+declare global {
+  interface Window {
+    DEBOUNCE_TIME?: number;
+  }
+}
+
 function main() {
   const rectangleCollection = new RectangleCollections();
   const userReaction = new UserActions(rectangleCollection);
