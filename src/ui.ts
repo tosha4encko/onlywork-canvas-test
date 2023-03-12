@@ -7,6 +7,10 @@ class UI {
     canvas.width = window.innerWidth * 0.75;
     canvas.height = window.innerHeight;
 
+    const editableCanvas: HTMLCanvasElement = document.querySelector('#root-canvas');
+    editableCanvas.width = window.innerWidth * 0.75;
+    editableCanvas.height = window.innerHeight;
+
     // todo хорошо бы еще проверять типы
     if (!addButton || !deleteButton || !canvas) {
       throw new Error('ui is not defined');
@@ -14,11 +18,13 @@ class UI {
     this.addButton = addButton;
     this.deleteButton = deleteButton;
     this.canvas = canvas;
+    this.editableCanvas = editableCanvas;
   }
 
   readonly addButton: HTMLButtonElement;
   readonly deleteButton: HTMLButtonElement;
   readonly canvas: HTMLCanvasElement;
+  readonly editableCanvas: HTMLCanvasElement;
 }
 
 export const ui = new UI();

@@ -1,6 +1,6 @@
-import {Rectangle} from 'geoms/Rectangle';
+import {Rectangle} from 'geoms/rectangle';
 import {pointIterator} from './iterators';
-import {Coord} from 'geoms/Point';
+import {Coord} from 'geoms/point';
 
 const EPS = 5;
 //todo каррирование?

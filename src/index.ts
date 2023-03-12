@@ -1,5 +1,5 @@
 import {ui} from './ui';
-import {RectangleCollections} from './geoms/RectangleCollection';
+import {RectangleCollections} from './geoms/rectangle-collection';
 import {Render} from './render';
 import {Rectangle} from './geoms/Rectangle';
 import {UserActions} from './user-actions';
@@ -8,6 +8,10 @@ import {Reactions} from './reaction';
 declare global {
   interface Window {
     DEBOUNCE_TIME?: number;
+    // rectangleCollection
+    // userReaction
+    // reactions
+    // render
   }
 }
 
@@ -18,7 +22,7 @@ function main() {
   const render = new Render(rectangleCollection, userReaction);
 
   ui.addButton.addEventListener('click', () => {
-    rectangleCollection.push(
+    rectangleCollection.collection.append(
       new Rectangle([
         [50, 50],
         [50, 200],

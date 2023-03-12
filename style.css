@@ -23,6 +23,12 @@ body {
     display: inline-block;
 }
 
+.root-canvas {
+    width: 75%;
+    height: 100%;
+    display: inline-block;
+}
+
 .sidebar {
     display: inline-block;
     vertical-align: top;
