@@ -1,4 +1,4 @@
-import {IGeometry, Geometry} from './geometry';
+import {Geometry, IGeometry} from './geometry';
 import {Observable} from '../observable';
 
 export type Coord = [number, number];
@@ -7,7 +7,7 @@ interface IPoint extends IGeometry {
   coord: Coord;
 }
 
-export class Point extends Geometry<IPoint> implements IPoint {
+export class Point extends Geometry {
   constructor(private _coord: Coord) {
     super();
   }

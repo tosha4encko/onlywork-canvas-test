@@ -1,26 +1,22 @@
-import {ui} from './ui';
-import {RectangleCollections} from './geoms/rectangle-collection';
-import {debounce, Observable} from './observable';
-import {IGeometry} from './geoms/geometry';
-import {Coord} from './geoms/Point';
+import {ui} from 'ui';
+import {RectangleCollections} from 'geoms/rectangle-collection';
+import {debounce, Observable} from 'observable';
+import {Geometry} from 'geoms/geometry';
+import {Coord} from 'geoms/Point';
 import {getIntersectionGeom} from 'geom-utils/intersection';
 
-export type SelectAction = {
-  geom: IGeometry;
-  selected: boolean;
-};
 export type HoveredAction = {
-  geom: IGeometry;
+  geom: Geometry;
   hovered: boolean;
 };
 export type MoveAction = {
-  geom: IGeometry;
+  geom: Geometry;
   moveCoord: Coord;
 };
 
-export class UserActions {
+export class ActionsWithGeom {
   private _clickPoint?: Coord;
-  private _activeGeom?: IGeometry;
+  private _activeGeom?: Geometry;
 
   private _movedObservable = new Observable<MoveAction>();
   moveSubscribe(cb: (value: MoveAction) => void) {
@@ -66,7 +62,6 @@ export class UserActions {
     const {x: x0, y: y0} = ev;
     const [x, y] = this._clickPoint;
     this._clickPoint = [x0, y0];
-
     this._movedObservable.notify({
       geom: this._activeGeom,
       moveCoord: [x - x0, y - y0],

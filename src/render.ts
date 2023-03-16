@@ -1,68 +1,56 @@
 import {ui} from './ui';
 import {RectangleCollections} from 'geoms/rectangle-collection';
-import {Observable, Subscriber} from './observable';
+import {Subscriber} from './observable';
 import {Point} from 'geoms/Point';
-import {UserActions} from './user-actions';
-import {filter, map, pointIterator, rectangleIterator} from 'geom-utils/iterators';
+import {ActionsWithGeom} from './user-activity/actions-with-geom';
+import {find, pointIterator} from 'geom-utils/iterators';
 import {Rectangle} from 'geoms/Rectangle';
-import {IGeometry} from 'geoms/geometry';
-import {forEach, isEqual, keys} from 'lodash';
+import {Geometry} from 'geoms/geometry';
+import {Reactions} from './user-activity/reaction';
+import {ReactiveCollection} from './reactive-colection';
+import {UserRectangleCollection} from './user-activity/user-rectangle-collection';
 
 const POINT_SIZE = 5;
 
-function getColor(geom: IGeometry) {
-  // if (geom.selected) {
-  //   return 'green';
-  // }
-  // if (geom.hovered) {
-  //   return 'orange';
-  // }
+function getRelationsRectangle(geom: Geometry, collection: ReactiveCollection<Rectangle>) {
+  if (geom instanceof Rectangle) {
+    return geom;
+  }
+  if (geom instanceof Point) {
+    return find(collection.iterate(), (rectangle) => rectangle.points.has(geom));
+  }
+}
+
+function getColor(geom: Geometry, userActionsCollection: UserRectangleCollection) {
+  const rect = getRelationsRectangle(geom, userActionsCollection.allGeomCollection);
+  if (userActionsCollection.hoveredGeomCollection.has(rect)) {
+    return 'orange';
+  }
   return 'blue';
 }
 
-// class InactiveRectangles {
-//   private _inactiveRectangles: Set<number> = new Set();
-//   private _subscribers: Set<(rectangles: Set<number>) => void> = new Set();
-//
-//   constructor(collection: RectangleCollections) {
-//     const hoveredRectangles = filter(rectangleIterator(collection), ({hovered}) => hovered);
-//     this._inactiveRectangles = new Set(map(hoveredRectangles, ({id}) => id));
-//
-//     collection.subscribe((newCollrction) => {
-//       if (!isEqual(this._inactiveRectangles, new Set(keys(newCollrction)))) {
-//         const hoveredRectangles = filter(rectangleIterator(collection), ({hovered}) => hovered);
-//         this._inactiveRectangles = new Set(map(hoveredRectangles, ({id}) => id));
-//         this._subscribers.forEach((subscriber) => subscriber(this._inactiveRectangles));
-//       }
-//     });
-//   }
-//
-//   subscribe(cb: (rectangles: Set<number>) => void) {
-//     this._subscribers.add(cb);
-//     return {unsubscribe: () => this._subscribers.delete(cb)};
-//   }
-//
-//   getInactiveGeoms() {
-//     return Array.from(this._inactiveRectangles);
-//   }
-// }
-
-// function getInactiveRectangles(collection: IGeometry) {
-//   return filter(rectangleIterator(collection), ({hovered}) => hovered);
-// }
-
-// todo сделать функцией?
 export class Render {
   private _subscribers: Subscriber[] = [];
   constructor(
     private _rectangleCollection: RectangleCollections,
-    private _userReaction: UserActions,
+    private _userRectangleCollections: UserRectangleCollection,
+    private _userReaction: ActionsWithGeom,
+    private _reactions: Reactions,
     private _ui = ui,
   ) {
+    this._subscribers.push(
+      this._rectangleCollection.collection.subscribe(() => {
+        for (const point of pointIterator(this._rectangleCollection)) {
+          this._subscribers.push(point.subscribe(this._render));
+        }
+      }),
+    );
     this._subscribers.push(this._rectangleCollection.collection.subscribe(this._render));
+    this._subscribers.push(this._reactions.hoveredGeomCollection.subscribe(this._render));
   }
 
   private _render = () => {
+    console.log('render');
     this._clear();
     for (let rectangle of this._rectangleCollection.collection.iterate()) {
       this._rectangleRender(rectangle);
@@ -87,7 +75,7 @@ export class Render {
     const [x0, y0] = first.coord;
 
     ctx.beginPath();
-    ctx.strokeStyle = getColor(rectangle);
+    ctx.strokeStyle = getColor(rectangle, this._userRectangleCollections);
     ctx.moveTo(x0, y0);
     other.forEach((point) => {
       const [x0, y0] = point.coord;
@@ -105,16 +93,16 @@ export class Render {
 
     const ctx = this._ui.canvas.getContext('2d');
     ctx.beginPath();
-    ctx.fillStyle = getColor(point);
+    ctx.fillStyle = getColor(point, this._userRectangleCollections);
     ctx.arc(...point.coord, POINT_SIZE, 0, 2 * Math.PI, true);
     ctx.fill();
   };
 
   destruct() {
     // todo тут где-то баг
-    // const ctx = this._ui.canvas.getContext('2d');
-    // ctx.clearRect(0, 0, this._ui.canvas.width, this._ui.canvas.height);
-    // this._rectangleCollection.collection = [];
-    // this._subscribers.forEach((subscriber) => subscriber.unsubscribe());
+    const ctx = this._ui.canvas.getContext('2d');
+    ctx.clearRect(0, 0, this._ui.canvas.width, this._ui.canvas.height);
+    this._rectangleCollection.collection.clear();
+    this._subscribers.forEach((subscriber) => subscriber.unsubscribe());
   }
 }

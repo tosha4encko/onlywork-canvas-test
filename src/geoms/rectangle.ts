@@ -6,7 +6,7 @@ interface IRectangle extends IGeometry {
   points: Point[];
 }
 
-export class Rectangle extends Geometry<IRectangle> {
+export class Rectangle extends Geometry {
   readonly points = new ReactiveCollection<Point>();
 
   constructor(points: Coord[]);

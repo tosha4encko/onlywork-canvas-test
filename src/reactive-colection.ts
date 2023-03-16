@@ -1,13 +1,12 @@
 import {Observable} from './observable';
+import {IGeometry} from './geoms/geometry';
 
-interface CollectinItem {
-  id: number;
-}
-export class ReactiveCollection<T extends CollectinItem> {
+export class ReactiveCollection<T extends IGeometry> {
   private _collection: Map<number, T> = new Map<number, T>();
   private _observable = new Observable<ReactiveCollection<T>>();
 
   subscribe(cb: (own: ReactiveCollection<T>) => void) {
+    // todo добавить тип события
     return this._observable.subscribe(cb);
   }
 
@@ -15,8 +14,10 @@ export class ReactiveCollection<T extends CollectinItem> {
     return this._collection.get(id);
   }
 
-  has(id: number) {
-    return !!this._collection.get(id);
+  has(id: number): boolean;
+  has(item: T): boolean;
+  has(idOrItem: number | T) {
+    return !!this._collection.get(typeof idOrItem === 'number' ? idOrItem : idOrItem.id);
   }
 
   append(item: T) {
@@ -24,8 +25,15 @@ export class ReactiveCollection<T extends CollectinItem> {
     this._observable.notify(this);
   }
 
-  delete(id: number) {
-    this._collection.delete(id);
+  delete(id: number): void;
+  delete(item: T): void;
+  delete(idOrItem: number | T) {
+    this._collection.delete(typeof idOrItem === 'number' ? idOrItem : idOrItem.id);
+    this._observable.notify(this);
+  }
+
+  clear() {
+    this._collection.clear();
     this._observable.notify(this);
   }
 

@@ -3,7 +3,7 @@ export interface IGeometry {
 }
 
 let lastIndex = 0;
-export abstract class Geometry<T extends IGeometry> {
+export abstract class Geometry {
   readonly id = lastIndex++; // todo можно удалить?
-  abstract snapshot(): T;
+  abstract snapshot(): IGeometry;
 }

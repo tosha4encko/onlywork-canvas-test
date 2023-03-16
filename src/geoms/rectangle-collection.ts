@@ -8,7 +8,7 @@ interface IRectangleCollections extends IGeometry {
   collection: Rectangle[];
 }
 
-export class RectangleCollections extends Geometry<IRectangleCollections> {
+export class RectangleCollections extends Geometry {
   readonly collection = new ReactiveCollection<Rectangle>();
 
   constructor(collection?: Coord[][]);

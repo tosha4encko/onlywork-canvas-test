@@ -2,8 +2,9 @@ import {ui} from './ui';
 import {RectangleCollections} from './geoms/rectangle-collection';
 import {Render} from './render';
 import {Rectangle} from './geoms/Rectangle';
-import {UserActions} from './user-actions';
-import {Reactions} from './reaction';
+import {ActionsWithGeom} from './user-activity/actions-with-geom';
+import {Reactions} from './user-activity/reaction';
+import {UserRectangleCollection} from './user-activity/user-rectangle-collection';
 
 declare global {
   interface Window {
@@ -17,9 +18,10 @@ declare global {
 
 function main() {
   const rectangleCollection = new RectangleCollections();
-  const userReaction = new UserActions(rectangleCollection);
-  const reactions = new Reactions(rectangleCollection, userReaction);
-  const render = new Render(rectangleCollection, userReaction);
+  const userReaction = new ActionsWithGeom(rectangleCollection);
+  const userActionsCollection = new UserRectangleCollection(rectangleCollection, userReaction);
+  const reactions = new Reactions(userReaction);
+  const render = new Render(rectangleCollection, userActionsCollection, userReaction, reactions);
 
   ui.addButton.addEventListener('click', () => {
     rectangleCollection.collection.append(
