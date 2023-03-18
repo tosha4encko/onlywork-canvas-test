@@ -1,12 +1,17 @@
 import {Observable} from './observable';
 import {IGeometry} from './geoms/geometry';
 
+export enum ReactiveCollectionFires {
+  Append = 'append',
+  Delete = 'delete',
+  Clear = 'clear',
+}
+
 export class ReactiveCollection<T extends IGeometry> {
   private _collection: Map<number, T> = new Map<number, T>();
-  private _observable = new Observable<ReactiveCollection<T>>();
+  private _observable = new Observable<{type: ReactiveCollectionFires; objId?: number}>();
 
-  subscribe(cb: (own: ReactiveCollection<T>) => void) {
-    // todo добавить тип события
+  subscribe(cb: (ev: {type: ReactiveCollectionFires; objId: number}) => void) {
     return this._observable.subscribe(cb);
   }
 
@@ -22,19 +27,20 @@ export class ReactiveCollection<T extends IGeometry> {
 
   append(item: T) {
     this._collection.set(item.id, item);
-    this._observable.notify(this);
+    this._observable.notify({objId: item.id, type: ReactiveCollectionFires.Append});
   }
 
   delete(id: number): void;
   delete(item: T): void;
   delete(idOrItem: number | T) {
-    this._collection.delete(typeof idOrItem === 'number' ? idOrItem : idOrItem.id);
-    this._observable.notify(this);
+    const id = typeof idOrItem === 'number' ? idOrItem : idOrItem.id;
+    this._collection.delete(id);
+    this._observable.notify({objId: id, type: ReactiveCollectionFires.Delete});
   }
 
   clear() {
     this._collection.clear();
-    this._observable.notify(this);
+    this._observable.notify({type: ReactiveCollectionFires.Delete});
   }
 
   *iterate() {

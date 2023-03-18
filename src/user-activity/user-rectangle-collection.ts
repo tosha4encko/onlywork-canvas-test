@@ -3,7 +3,7 @@ import {Rectangle} from 'geoms/Rectangle';
 import {Point} from 'geoms/Point';
 import {ActionsWithGeom} from './actions-with-geom';
 import {Geometry} from '../geoms/geometry';
-import {ReactiveCollection} from '../reactive-colection';
+import {ReactiveCollectionFires} from '../reactive-colection';
 import {find} from '../geom-utils/iterators';
 
 interface ReadonlyRectangleCollection<T> {
@@ -12,14 +12,12 @@ interface ReadonlyRectangleCollection<T> {
 }
 
 export class UserRectangleCollection {
-  readonly allGeomCollection: ReactiveCollection<Rectangle>;
-  readonly hoveredGeomCollection: ReactiveCollection<Rectangle>;
-  readonly sleepingGeomCollection: ReactiveCollection<Rectangle>;
+  readonly hoveredGeomCollection: RectangleCollections;
+  readonly sleepingGeomCollection: RectangleCollections;
 
-  constructor(rectangleCollection: RectangleCollections, userActions: ActionsWithGeom) {
-    this.allGeomCollection = rectangleCollection.collection;
-    this.hoveredGeomCollection = new ReactiveCollection<Rectangle>();
-    this.sleepingGeomCollection = new ReactiveCollection<Rectangle>();
+  constructor(readonly allGeomCollection: RectangleCollections, userActions: ActionsWithGeom) {
+    this.hoveredGeomCollection = new RectangleCollections();
+    this.sleepingGeomCollection = new RectangleCollections();
 
     userActions.hoveredSubscribe(({geom, hovered}) => {
       const hoveredRectangle = this._getHoveredRectangle(geom);
@@ -29,7 +27,16 @@ export class UserRectangleCollection {
 
       this._changeCollections(hoveredRectangle, hovered);
     });
-    this.allGeomCollection.subscribe(() => {});
+
+    this.allGeomCollection.collection.subscribe(({type, objId}) => {
+      const obj = this.allGeomCollection.collection.get(objId);
+      if (type === ReactiveCollectionFires.Delete) {
+        this.hoveredGeomCollection.collection.delete(obj);
+        this.sleepingGeomCollection.collection.delete(obj);
+      } else if (type === ReactiveCollectionFires.Append) {
+        this.sleepingGeomCollection.collection.append(obj);
+      }
+    });
   }
 
   private _getHoveredRectangle(geom: Geometry): Rectangle | undefined {
@@ -37,17 +44,17 @@ export class UserRectangleCollection {
       return geom;
     }
     if (geom instanceof Point) {
-      return find(this.allGeomCollection.iterate(), (rectangle) => rectangle.points.has(geom));
+      return find(this.allGeomCollection.collection.iterate(), (rectangle) => rectangle.points.has(geom));
     }
   }
 
   private _changeCollections(rectangle: Rectangle, hovered: boolean) {
     if (hovered) {
-      this.hoveredGeomCollection.append(rectangle);
-      this.sleepingGeomCollection.delete(rectangle);
+      this.hoveredGeomCollection.collection.append(rectangle);
+      this.sleepingGeomCollection.collection.delete(rectangle);
     } else {
-      this.hoveredGeomCollection.delete(rectangle);
-      this.sleepingGeomCollection.append(rectangle);
+      this.hoveredGeomCollection.collection.delete(rectangle);
+      this.sleepingGeomCollection.collection.append(rectangle);
     }
   }
 }

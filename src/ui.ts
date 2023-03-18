@@ -7,9 +7,9 @@ class UI {
     canvas.width = window.innerWidth * 0.75;
     canvas.height = window.innerHeight;
 
-    const editableCanvas: HTMLCanvasElement = document.querySelector('#root-canvas');
-    editableCanvas.width = window.innerWidth * 0.75;
-    editableCanvas.height = window.innerHeight;
+    const dirtyCanvas: HTMLCanvasElement = document.querySelector('#dirty-canvas');
+    dirtyCanvas.width = window.innerWidth * 0.75;
+    dirtyCanvas.height = window.innerHeight;
 
     // todo хорошо бы еще проверять типы
     if (!addButton || !deleteButton || !canvas) {
@@ -18,13 +18,13 @@ class UI {
     this.addButton = addButton;
     this.deleteButton = deleteButton;
     this.canvas = canvas;
-    this.editableCanvas = editableCanvas;
+    this.dirtyCanvas = dirtyCanvas;
   }
 
   readonly addButton: HTMLButtonElement;
   readonly deleteButton: HTMLButtonElement;
   readonly canvas: HTMLCanvasElement;
-  readonly editableCanvas: HTMLCanvasElement;
+  readonly dirtyCanvas: HTMLCanvasElement;
 }
 
 export const ui = new UI();

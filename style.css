@@ -19,19 +19,23 @@ body {
 .root-canvas {
     width: 75%;
     height: 100%;
-    background-color: azure;
+    background: transparent;
     display: inline-block;
+    position: absolute;
 }
 
-.root-canvas {
+.dirty-canvas {
     width: 75%;
     height: 100%;
     display: inline-block;
+    position: absolute;
+    background: transparent;
 }
 
 .sidebar {
     display: inline-block;
     vertical-align: top;
+    float: right;
 }
 
 .sidebar > * {

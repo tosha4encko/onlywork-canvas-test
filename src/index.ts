@@ -21,7 +21,7 @@ function main() {
   const userReaction = new ActionsWithGeom(rectangleCollection);
   const userActionsCollection = new UserRectangleCollection(rectangleCollection, userReaction);
   const reactions = new Reactions(userReaction);
-  const render = new Render(rectangleCollection, userActionsCollection, userReaction, reactions);
+  const render = new Render(userActionsCollection, reactions);
 
   ui.addButton.addEventListener('click', () => {
     rectangleCollection.collection.append(
@@ -35,7 +35,7 @@ function main() {
   });
 
   ui.deleteButton.addEventListener('click', () => {
-    render.destruct();
+    // render.destruct();
   });
 }
 

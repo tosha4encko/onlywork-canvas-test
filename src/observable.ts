@@ -4,11 +4,11 @@ export interface Subscriber {
 export class Observable<T> {
   private _subscribers: Set<(value: T) => void> = new Set();
 
-  notify(value: T) {
-    this._subscribers.forEach((subscriber) => subscriber(value));
+  notify(ev: T) {
+    this._subscribers.forEach((subscriber) => subscriber(ev));
   }
 
-  subscribe(cb: (value: T) => void): Subscriber {
+  subscribe(cb: (ev: T) => void): Subscriber {
     this._subscribers.add(cb);
     return {
       unsubscribe: () => this._subscribers.delete(cb),
