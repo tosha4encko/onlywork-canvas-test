@@ -1,4 +1,4 @@
-import {Rectangle} from 'geoms/Rectangle';
+import {Rectangle} from 'geoms/rectangle';
 import {RectangleCollections} from 'geoms/rectangle-collection';
 import {Coord, Point} from 'geoms/point';
 import {IGeometry} from 'geoms/geometry';
@@ -41,7 +41,7 @@ export function* rectangleIterator(geom: IGeometry): IterableIterator<Rectangle>
   }
 }
 
-export function find<T>(generator: IterableIterator<T>, predicat: (value: T) => boolean) {
+export function find<T>(generator: IterableIterator<T>, predicat: (value: T) => boolean): T | undefined {
   for (let item of generator) {
     if (predicat(item)) {
       return item;

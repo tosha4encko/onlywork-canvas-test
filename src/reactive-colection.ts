@@ -1,5 +1,5 @@
-import {Observable} from './observable';
-import {IGeometry} from './geoms/geometry';
+import {Observable} from 'observable';
+import {IGeometry} from 'geoms/geometry';
 
 export enum ReactiveCollectionFires {
   Append = 'append',
@@ -7,11 +7,13 @@ export enum ReactiveCollectionFires {
   Clear = 'clear',
 }
 
+export type ReactiveCollectionChangeEvent = {type: ReactiveCollectionFires; objId: number};
+
 export class ReactiveCollection<T extends IGeometry> {
   private _collection: Map<number, T> = new Map<number, T>();
   private _observable = new Observable<{type: ReactiveCollectionFires; objId?: number}>();
 
-  subscribe(cb: (ev: {type: ReactiveCollectionFires; objId: number}) => void) {
+  subscribe(cb: (ev: ReactiveCollectionChangeEvent) => void) {
     return this._observable.subscribe(cb);
   }
 
@@ -25,9 +27,11 @@ export class ReactiveCollection<T extends IGeometry> {
     return !!this._collection.get(typeof idOrItem === 'number' ? idOrItem : idOrItem.id);
   }
 
-  append(item: T) {
-    this._collection.set(item.id, item);
-    this._observable.notify({objId: item.id, type: ReactiveCollectionFires.Append});
+  append(...items: T[]) {
+    for (const item of items) {
+      this._collection.set(item.id, item);
+      this._observable.notify({objId: item.id, type: ReactiveCollectionFires.Append});
+    }
   }
 
   delete(id: number): void;

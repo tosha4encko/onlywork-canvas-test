@@ -1,5 +1,6 @@
+import {Observable} from 'observable';
+
 import {Geometry, IGeometry} from './geometry';
-import {Observable} from '../observable';
 
 export type Coord = [number, number];
 interface IPoint extends IGeometry {

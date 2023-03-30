@@ -1,9 +1,12 @@
 import {Geometry} from 'geoms/geometry';
 import {Coord} from 'geoms/Point';
-import {edgeIterator, ever, find, pointIterator, rectangleIterator} from './iterators';
 import {equelPoints, getCenter, sign} from 'geom-utils/math';
+import {Rectangle} from 'geoms/rectangle';
+import {Point} from 'geoms/point';
 
-export function getIntersectionGeom(geom: Geometry, [x, y]: Coord) {
+import {edgeIterator, ever, find, pointIterator, rectangleIterator} from './iterators';
+
+export function getIntersectionGeom(geom: Geometry, [x, y]: Coord): Rectangle | Point | undefined {
   const intersectedPoint = getIntersectionPoint(geom, [x, y]);
   if (intersectedPoint) {
     return intersectedPoint;
@@ -19,7 +22,7 @@ export function getIntersectionPoint(geom: Geometry, [x, y]: Coord) {
   return find(pointIterator(geom), ({coord}) => equelPoints(coord, [x, y]));
 }
 
-export function getIntersectionRectangle(geom: Geometry, [x, y]: Coord) {
+export function getIntersectionRectangle<T extends Geometry>(geom: T, [x, y]: Coord): Rectangle | undefined {
   return find(rectangleIterator(geom), (rectangle) => {
     const center = getCenter(rectangle);
     const isOneSide = (edge: [Coord, Coord]) => sign([x, y], edge) === sign(center, edge);

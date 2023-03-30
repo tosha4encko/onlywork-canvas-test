@@ -1,74 +1,113 @@
 import {ui} from './ui';
-import {Point} from 'geoms/Point';
-import {find, pointIterator} from 'geom-utils/iterators';
-import {Rectangle} from 'geoms/Rectangle';
-import {Geometry} from 'geoms/geometry';
-import {Reactions} from './user-activity/reaction';
-import {ReactiveCollection, ReactiveCollectionFires} from './reactive-colection';
-import {UserRectangleCollection} from './user-activity/user-rectangle-collection';
-import {RectangleCollections} from './geoms/rectangle-collection';
+import {Point} from 'geoms/point';
+import {pointIterator} from 'geom-utils/iterators';
+import {Rectangle} from 'geoms/rectangle';
+
+import {ReactiveCollectionChangeEvent, ReactiveCollectionFires} from './reactive-colection';
 import {Subscriber} from './observable';
+import {RectangleCollections} from './geoms/rectangle-collection';
 
 const POINT_SIZE = 5;
 
-function getRelationsRectangle(geom: Geometry, collection: ReactiveCollection<Rectangle>) {
-  if (geom instanceof Rectangle) {
-    return geom;
-  }
-  if (geom instanceof Point) {
-    return find(collection.iterate(), (rectangle) => rectangle.points.has(geom));
-  }
-}
-
-function getColor(geom: Geometry, userActionsCollection: UserRectangleCollection) {
-  const rect = getRelationsRectangle(geom, userActionsCollection.allGeomCollection.collection);
-  if (userActionsCollection.hoveredGeomCollection.collection.has(rect)) {
-    return 'orange';
-  }
-  return 'blue';
-}
-
 export class Render {
+  private _sleepingGeoms: RectangleCollections;
   constructor(
-    private _userRectangleCollections: UserRectangleCollection,
-    private _reactions: Reactions,
+    private _allRectangles: RectangleCollections,
+    private _hoveredGeoms: RectangleCollections,
     private _ui = ui,
   ) {
-    const {hoveredGeomCollection, sleepingGeomCollection} = this._userRectangleCollections;
-    this._subscribeToRender(hoveredGeomCollection, this._ui.dirtyCanvas);
-    this._subscribeToRender(sleepingGeomCollection, this._ui.canvas);
+    const allRectangles = this._allRectangles.collection;
+    const hoveredRectangles = this._hoveredGeoms.collection;
+    this._sleepingGeoms = new RectangleCollections([...allRectangles.iterate()]);
+
+    allRectangles.subscribe(this._allRectangleChangeHandler);
+    hoveredRectangles.subscribe(this._hoveredRectangleChangeHandler);
+
+    new _RenderCollection(this._hoveredGeoms, 'orange', this._ui.dirtyCanvas);
+    new _RenderCollection(this._sleepingGeoms, 'blue', this._ui.canvas);
   }
 
-  private _subscribeToRender(collection: RectangleCollections, canvas: HTMLCanvasElement) {
-    const render = () => this._render(collection, canvas);
-    collection.collection.subscribe(render);
+  private _allRectangleChangeHandler = ({type, objId}: ReactiveCollectionChangeEvent) => {
+    const allRectangles = this._allRectangles.collection;
+    const hoveredRectangles = this._hoveredGeoms.collection;
+    const sleepingRectangle = this._sleepingGeoms.collection;
 
-    let pointsSubscribers: Subscriber[] = [];
-    collection.collection.subscribe(({type}) => {
-      if (type === ReactiveCollectionFires.Append) {
-        for (const point of pointIterator(collection)) {
-          pointsSubscribers.push(point.subscribe(render));
+    switch (type) {
+      case ReactiveCollectionFires.Append:
+        if (!hoveredRectangles.has(objId)) {
+          sleepingRectangle.append(allRectangles.get(objId));
         }
-      } else {
-        for (const subscriber of pointsSubscribers) {
-          subscriber.unsubscribe();
-        }
-        pointsSubscribers = [];
+        break;
+      case ReactiveCollectionFires.Delete:
+        sleepingRectangle.delete(objId);
+        break;
+      case ReactiveCollectionFires.Clear:
+        sleepingRectangle.clear();
+        break;
+    }
+  };
+
+  private _hoveredRectangleChangeHandler = ({type, objId}: ReactiveCollectionChangeEvent) => {
+    const allRectangles = this._allRectangles.collection;
+    const sleepingRectangle = this._sleepingGeoms.collection;
+
+    switch (type) {
+      case ReactiveCollectionFires.Append:
+        sleepingRectangle.delete(objId);
+        break;
+      case ReactiveCollectionFires.Delete:
+        sleepingRectangle.append(allRectangles.get(objId));
+        break;
+    }
+  };
+}
+
+export class _RenderCollection {
+  constructor(private _rectangles: RectangleCollections, private _color: string, private _canvas = ui.canvas) {
+    // Подписываемся на точки геометрий, которые уже есть в коллекции
+    let pointsSubscribers: Record<number, Subscriber> = {};
+    for (const point of pointIterator(this._rectangles)) {
+      pointsSubscribers[point.id] = point.subscribe(this._render);
+    }
+
+    // Подписываемся изменения в коллекции
+    this._rectangles.collection.subscribe(({type, objId}) => {
+      const rect = this._rectangles.collection.get(objId);
+      switch (type) {
+        case ReactiveCollectionFires.Append:
+          this._render();
+          for (const point of pointIterator(rect)) {
+            pointsSubscribers[point.id] = point.subscribe(this._render);
+          }
+          break;
+        case ReactiveCollectionFires.Delete:
+          this._render();
+          for (const point of pointIterator(rect)) {
+            pointsSubscribers[point.id].unsubscribe();
+            delete pointsSubscribers[point.id];
+          }
+          break;
+        case ReactiveCollectionFires.Clear:
+          this._render();
+          for (const pointId in pointsSubscribers) {
+            pointsSubscribers[pointId].unsubscribe();
+          }
+          pointsSubscribers = {};
+          break;
       }
     });
+    this._render();
   }
 
-  private _render = (rectanglesCollection: RectangleCollections, canvas: HTMLCanvasElement) => {
-    console.log(`length - ${[...rectanglesCollection.collection.iterate()].length}; canvas - `, canvas);
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  private _render = () => {
+    const ctx = this._canvas.getContext('2d');
+    ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
-    for (let rectangle of rectanglesCollection.collection.iterate()) {
-      console.log('-');
-      this._rectangleRender(rectangle, canvas);
+    for (let rectangle of this._rectangles.collection.iterate()) {
+      this._rectangleRender(rectangle, this._canvas);
     }
-    for (let point of pointIterator(rectanglesCollection)) {
-      this._pointRender(point, canvas);
+    for (let point of pointIterator(this._rectangles)) {
+      this._pointRender(point, this._canvas);
     }
   };
 
@@ -79,7 +118,7 @@ export class Render {
     const [x0, y0] = first.coord;
 
     ctx.beginPath();
-    ctx.strokeStyle = getColor(rectangle, this._userRectangleCollections);
+    ctx.strokeStyle = this._color;
     ctx.moveTo(x0, y0);
     other.forEach((point) => {
       const [x0, y0] = point.coord;
@@ -91,13 +130,9 @@ export class Render {
   };
 
   private _pointRender = (point: Point, canvas: HTMLCanvasElement) => {
-    // if (!point.selected && !point.hovered) {
-    //   return;
-    // }
-
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
-    ctx.fillStyle = getColor(point, this._userRectangleCollections);
+    ctx.fillStyle = this._color;
     ctx.arc(...point.coord, POINT_SIZE, 0, 2 * Math.PI, true);
     ctx.fill();
   };

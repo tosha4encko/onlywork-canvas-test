@@ -1,6 +1,7 @@
+import {ReactiveCollection} from 'reactive-colection';
+
 import {IGeometry, Geometry} from './geometry';
-import {Coord, Point} from './Point';
-import {ReactiveCollection} from '../reactive-colection';
+import {Coord, Point} from './point';
 
 interface IRectangle extends IGeometry {
   points: Point[];

@@ -1,8 +1,9 @@
 import {Rectangle} from 'geoms/rectangle';
-import {pointIterator} from './iterators';
 import {Coord} from 'geoms/point';
 
-const EPS = 5;
+import {pointIterator} from './iterators';
+
+const EPS = 7;
 //todo каррирование?
 export function equelPoints([x1, y1]: Coord, [x2, y2]: Coord) {
   return Math.abs(x1 - x2) < EPS && Math.abs(y1 - y2) < EPS;

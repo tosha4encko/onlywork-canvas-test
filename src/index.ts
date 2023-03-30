@@ -1,10 +1,9 @@
-import {ui} from './ui';
-import {RectangleCollections} from './geoms/rectangle-collection';
-import {Render} from './render';
-import {Rectangle} from './geoms/Rectangle';
-import {ActionsWithGeom} from './user-activity/actions-with-geom';
-import {Reactions} from './user-activity/reaction';
-import {UserRectangleCollection} from './user-activity/user-rectangle-collection';
+import {ui} from 'ui';
+import {RectangleCollections} from 'geoms/rectangle-collection';
+import {Render} from 'render';
+import {Rectangle} from 'geoms/rectangle';
+import {HoverGeomHandler} from 'user-activity/hover-geom-handler';
+import {MoveGeomHandler} from 'user-activity/move-geom-handler';
 
 declare global {
   interface Window {
@@ -18,10 +17,11 @@ declare global {
 
 function main() {
   const rectangleCollection = new RectangleCollections();
-  const userReaction = new ActionsWithGeom(rectangleCollection);
-  const userActionsCollection = new UserRectangleCollection(rectangleCollection, userReaction);
-  const reactions = new Reactions(userReaction);
-  const render = new Render(userActionsCollection, reactions);
+  const activeGeomCollection = new RectangleCollections();
+
+  new HoverGeomHandler(rectangleCollection, activeGeomCollection);
+  new MoveGeomHandler(rectangleCollection);
+  new Render(rectangleCollection, activeGeomCollection);
 
   ui.addButton.addEventListener('click', () => {
     rectangleCollection.collection.append(
