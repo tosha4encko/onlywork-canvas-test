@@ -1,7 +1,4 @@
-import {Rectangle} from 'geoms/rectangle';
-import {RectangleCollections} from 'geoms/rectangle-collection';
-import {Coord, Point} from 'geoms/point';
-import {IGeometry} from 'geoms/geometry';
+import {Rectangle, RectangleCollections, Coord, Point, IGeometry} from 'geoms';
 
 export function* pointIterator(geom: IGeometry): IterableIterator<Point> {
   if (geom instanceof Rectangle) {

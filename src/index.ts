@@ -1,9 +1,7 @@
 import {ui} from 'ui';
-import {RectangleCollections} from 'geoms/rectangle-collection';
 import {Render} from 'render';
-import {Rectangle} from 'geoms/rectangle';
-import {HoverGeomHandler} from 'user-activity/hover-geom-handler';
-import {MoveGeomHandler} from 'user-activity/move-geom-handler';
+import {RectangleCollections, Rectangle} from 'geoms';
+import {HoverGeomHandler, MoveGeomHandler} from 'user-activity';
 
 declare global {
   interface Window {

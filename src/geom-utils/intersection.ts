@@ -1,8 +1,5 @@
-import {Geometry} from 'geoms/geometry';
-import {Coord} from 'geoms/Point';
-import {equelPoints, getCenter, sign} from 'geom-utils/math';
-import {Rectangle} from 'geoms/rectangle';
-import {Point} from 'geoms/point';
+import {Geometry, Coord, Rectangle, Point} from 'geoms';
+import {equelPoints, getCenter, sign} from 'geom-utils';
 
 import {edgeIterator, ever, find, pointIterator, rectangleIterator} from './iterators';
 

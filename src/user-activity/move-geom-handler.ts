@@ -1,10 +1,7 @@
 import {ui} from 'ui';
 import {debounce} from 'observable';
-import {Geometry} from 'geoms/geometry';
-import {Coord, Point} from 'geoms/point';
-import {RectangleCollections} from 'geoms/rectangle-collection';
-import {Rectangle} from 'geoms/rectangle';
-import {getIntersectionGeom} from 'geom-utils/intersection';
+import {Geometry, Coord, Point, RectangleCollections, Rectangle} from 'geoms';
+import {getIntersectionGeom} from 'geom-utils';
 
 export class MoveGeomHandler {
   private _clickPoint?: Coord;
@@ -21,7 +18,7 @@ export class MoveGeomHandler {
     this._clickPoint = [x, y];
   };
 
-  private _mouseUpHandler = ({x, y}: MouseEvent) => {
+  private _mouseUpHandler = () => {
     this._activeGeom = undefined;
     this._clickPoint = undefined;
   };

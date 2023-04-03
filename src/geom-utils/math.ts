@@ -1,5 +1,4 @@
-import {Rectangle} from 'geoms/rectangle';
-import {Coord} from 'geoms/point';
+import {Rectangle, Coord} from 'geoms';
 
 import {pointIterator} from './iterators';
 

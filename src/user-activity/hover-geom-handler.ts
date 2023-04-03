@@ -1,10 +1,7 @@
 import {ui} from 'ui';
 import {debounce} from 'observable';
-import {Point, Coord} from 'geoms/point';
-import {Rectangle} from 'geoms/rectangle';
-import {RectangleCollections} from 'geoms/rectangle-collection';
-import {getIntersectionGeom} from 'geom-utils/intersection';
-import {find} from '../geom-utils/iterators';
+import {Point, Coord, Rectangle, RectangleCollections} from 'geoms';
+import {getIntersectionGeom, find} from 'geom-utils';
 
 // todo может быть функцией
 export class HoverGeomHandler {

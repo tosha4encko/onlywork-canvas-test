@@ -1,5 +1,4 @@
 import {Observable} from 'observable';
-
 import {Geometry, IGeometry} from './geometry';
 
 export type Coord = [number, number];

@@ -1,11 +1,8 @@
 import {ui} from './ui';
-import {Point} from 'geoms/point';
-import {pointIterator} from 'geom-utils/iterators';
-import {Rectangle} from 'geoms/rectangle';
-
-import {ReactiveCollectionChangeEvent, ReactiveCollectionFires} from './reactive-colection';
-import {Subscriber} from './observable';
-import {RectangleCollections} from './geoms/rectangle-collection';
+import {Point, Rectangle, RectangleCollections} from 'geoms';
+import {pointIterator} from 'geom-utils';
+import {ReactiveCollectionChangeEvent, ReactiveCollectionFires} from 'reactive-colection';
+import {Subscriber} from 'observable';
 
 const POINT_SIZE = 5;
 
