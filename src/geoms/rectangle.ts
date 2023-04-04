@@ -1,8 +1,10 @@
 import {ReactiveCollection} from 'reactive-colection';
-import {IGeometry, Geometry, Coord, Point} from '.';
+import {Geometry, Coord, Point} from '.';
 
-interface IRectangle extends IGeometry {
+interface IRectangleSnapshot {
+  id: number;
   points: Point[];
+  recover(): void;
 }
 
 export class Rectangle extends Geometry {
@@ -22,10 +24,15 @@ export class Rectangle extends Geometry {
     });
   }
 
-  snapshot(): IRectangle {
+  snapshot(): IRectangleSnapshot {
+    const pointsSnapshot = [...this.points.iterate()];
     return {
       id: this.id,
-      points: Array.from(this.points.iterate()),
+      points: pointsSnapshot,
+      recover: () => {
+        this.points.clear();
+        this.points.append(...pointsSnapshot);
+      },
     };
   }
 }

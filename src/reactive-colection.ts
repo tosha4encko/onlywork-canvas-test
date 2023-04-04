@@ -1,5 +1,5 @@
 import {Observable} from 'observable';
-import {IGeometry} from 'geoms/geometry';
+import {Geometry} from 'geoms';
 
 export enum ReactiveCollectionFires {
   Append = 'append',
@@ -9,7 +9,7 @@ export enum ReactiveCollectionFires {
 
 export type ReactiveCollectionChangeEvent = {type: ReactiveCollectionFires; objId: number};
 
-export class ReactiveCollection<T extends IGeometry> {
+export class ReactiveCollection<T extends Geometry> {
   private _collection: Map<number, T> = new Map<number, T>();
   private _observable = new Observable<{type: ReactiveCollectionFires; objId?: number}>();
 
@@ -44,10 +44,10 @@ export class ReactiveCollection<T extends IGeometry> {
 
   clear() {
     this._collection.clear();
-    this._observable.notify({type: ReactiveCollectionFires.Delete});
+    this._observable.notify({type: ReactiveCollectionFires.Clear});
   }
 
-  *iterate() {
+  *iterate(): IterableIterator<T> {
     const collection = this._collection;
     for (let item of collection.values()) {
       yield item;

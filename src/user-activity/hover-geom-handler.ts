@@ -1,11 +1,10 @@
 import {ui} from 'ui';
 import {debounce} from 'observable';
-import {Point, Coord, Rectangle, RectangleCollections} from 'geoms';
+import {Point, Rectangle, RectangleCollections} from 'geoms';
 import {getIntersectionGeom, find} from 'geom-utils';
 
-// todo может быть функцией
 export class HoverGeomHandler {
-  private _clickPoint?: Coord;
+  private _mouseDowned = false;
   private _activeGeom?: Rectangle;
 
   constructor(
@@ -13,31 +12,30 @@ export class HoverGeomHandler {
     private _hoveredGeoms: RectangleCollections,
     geomArea = ui.canvas,
   ) {
-    geomArea.addEventListener('mousemove', debounce(this._hoveredListener));
-    geomArea.addEventListener('mousedown', ({x, y}) => (this._clickPoint = [x, y]));
-    geomArea.addEventListener('mouseup', () => (this._clickPoint = undefined));
+    geomArea.addEventListener('mousemove', debounce(this._mouseMoveHandler));
+    geomArea.addEventListener('mousedown', () => (this._mouseDowned = true));
+    geomArea.addEventListener('mouseup', () => (this._mouseDowned = false));
   }
 
-  private _hoveredListener = ({x, y}: MouseEvent) => {
+  private _mouseMoveHandler = ({x, y}: MouseEvent) => {
     const activeGeom = getIntersectionGeom(this._allGeoms, [x, y]);
-    if (this._clickPoint !== undefined && activeGeom === this._activeGeom) {
+    if (activeGeom === this._activeGeom || (this._activeGeom !== undefined && this._mouseDowned)) {
       return;
     }
 
     const hoveredRecCollection = this._hoveredGeoms.collection;
-    const allRecCollection = this._allGeoms.collection;
-    if (this._activeGeom) {
-      hoveredRecCollection.delete(this._activeGeom.id);
-      this._activeGeom = undefined;
-    }
-    if (activeGeom instanceof Rectangle) {
-      this._activeGeom = activeGeom;
-    }
-    if (activeGeom instanceof Point) {
-      this._activeGeom = find(allRecCollection.iterate(), (rectangle) => rectangle.points.has(activeGeom.id));
-    }
-    if (this._activeGeom) {
-      hoveredRecCollection.append(this._activeGeom);
-    }
+    this._activeGeom && hoveredRecCollection.delete(this._activeGeom.id);
+
+    this._activeGeom = this._getRectangle(activeGeom);
+    this._activeGeom && hoveredRecCollection.append(this._activeGeom);
   };
+
+  private _getRectangle(currentGeom: Rectangle | Point) {
+    if (currentGeom instanceof Rectangle) {
+      return currentGeom;
+    }
+    if (currentGeom instanceof Point) {
+      return find(this._allGeoms.collection.iterate(), (rectangle) => rectangle.points.has(currentGeom.id));
+    }
+  }
 }

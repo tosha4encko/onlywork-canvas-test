@@ -27,18 +27,18 @@ export class MoveGeomHandler {
     if (this._clickPoint === undefined || this._activeGeom === undefined) {
       return;
     }
+
     const {x: x0, y: y0} = ev;
     const [x, y] = this._clickPoint;
+    const [xM, yM] = [x - x0, y - y0];
     this._clickPoint = [x0, y0];
-    const moveCoord = [x - x0, y - y0];
 
     if (this._activeGeom instanceof Point) {
-      const [xM, yM] = moveCoord;
       const [x0, y0] = this._activeGeom.coord;
       this._activeGeom.coord = [x0 - xM, y0 - yM];
     }
+
     if (this._activeGeom instanceof Rectangle) {
-      const [xM, yM] = moveCoord;
       for (const point of this._activeGeom.points.iterate()) {
         const [x0, y0] = point.coord;
         point.coord = [x0 - xM, y0 - yM];

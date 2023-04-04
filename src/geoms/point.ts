@@ -1,10 +1,11 @@
 import {Observable} from 'observable';
-import {Geometry, IGeometry} from './geometry';
+import {Geometry} from './geometry';
 
 export type Coord = [number, number];
-interface IPoint extends IGeometry {
+interface IPointSnapshot {
   id: number;
   coord: Coord;
+  recover(): void;
 }
 
 export class Point extends Geometry {
@@ -17,10 +18,14 @@ export class Point extends Geometry {
     return this._observable.subscribe(cb);
   }
 
-  snapshot(): IPoint {
+  snapshot(): IPointSnapshot {
+    const coordSnapshot: Coord = [...this._coord];
     return {
       id: this.id,
-      coord: [...this._coord],
+      coord: coordSnapshot,
+      recover: () => {
+        this.coord = coordSnapshot;
+      },
     };
   }
 

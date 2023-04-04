@@ -2,6 +2,8 @@ class UI {
   constructor() {
     const addButton: HTMLButtonElement = document.querySelector('#add');
     const deleteButton: HTMLButtonElement = document.querySelector('#delete');
+    const prevButton: HTMLButtonElement = document.querySelector('#prev');
+    const nextButton: HTMLButtonElement = document.querySelector('#next');
 
     const canvas: HTMLCanvasElement = document.querySelector('#root-canvas');
     canvas.width = window.innerWidth * 0.75;
@@ -17,12 +19,16 @@ class UI {
     }
     this.addButton = addButton;
     this.deleteButton = deleteButton;
+    this.prevButton = prevButton;
+    this.nextButton = nextButton;
     this.canvas = canvas;
     this.dirtyCanvas = dirtyCanvas;
   }
 
   readonly addButton: HTMLButtonElement;
   readonly deleteButton: HTMLButtonElement;
+  readonly prevButton: HTMLButtonElement;
+  readonly nextButton: HTMLButtonElement;
   readonly canvas: HTMLCanvasElement;
   readonly dirtyCanvas: HTMLCanvasElement;
 }

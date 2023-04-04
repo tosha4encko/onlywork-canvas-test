@@ -1,9 +1,7 @@
-export interface IGeometry {
-  id: number;
-}
+import {IRecoverableSnapshot} from 'user-activity/snapshots-caretaker';
 
 let lastIndex = 0;
 export abstract class Geometry {
-  readonly id = lastIndex++; // todo можно удалить?
-  abstract snapshot(): IGeometry;
+  readonly id = lastIndex++;
+  abstract snapshot(): IRecoverableSnapshot;
 }

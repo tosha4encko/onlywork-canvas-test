@@ -1,6 +1,6 @@
-import {Rectangle, RectangleCollections, Coord, Point, IGeometry} from 'geoms';
+import {Rectangle, RectangleCollections, Coord, Point, Geometry} from 'geoms';
 
-export function* pointIterator(geom: IGeometry): IterableIterator<Point> {
+export function* pointIterator(geom: Geometry): IterableIterator<Point> {
   if (geom instanceof Rectangle) {
     for (let point of geom.points.iterate()) {
       yield point;
@@ -14,7 +14,7 @@ export function* pointIterator(geom: IGeometry): IterableIterator<Point> {
   }
 }
 
-export function* edgeIterator(geom: IGeometry): IterableIterator<[Coord, Coord]> {
+export function* edgeIterator(geom: Geometry): IterableIterator<[Coord, Coord]> {
   if (geom instanceof Rectangle) {
     const points = [...geom.points.iterate()];
     for (let i = 1; i < points.length; i++) {
@@ -28,7 +28,7 @@ export function* edgeIterator(geom: IGeometry): IterableIterator<[Coord, Coord]>
   }
 }
 
-export function* rectangleIterator(geom: IGeometry): IterableIterator<Rectangle> {
+export function* rectangleIterator(geom: Geometry): IterableIterator<Rectangle> {
   if (geom instanceof Rectangle) {
     yield geom;
   } else if (geom instanceof RectangleCollections) {
@@ -65,5 +65,11 @@ export function ever<T>(generator: IterableIterator<T>, predicat: (value: T) => 
 export function* map<T, K>(generator: IterableIterator<T>, cb: (value: T) => K) {
   for (let item of generator) {
     yield cb(item);
+  }
+}
+
+export function* forEach<T>(generator: IterableIterator<T>, cb: (value: T) => void) {
+  for (let item of generator) {
+    cb(item);
   }
 }

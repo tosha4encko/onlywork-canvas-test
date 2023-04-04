@@ -1,9 +1,12 @@
 import {ReactiveCollection} from 'reactive-colection';
-import {Rectangle, IGeometry, Geometry, Coord} from '.';
+import {Rectangle, Geometry, Coord} from '.';
+import {IRecoverableSnapshot} from 'user-activity/snapshots-caretaker';
+import {map, pointIterator} from '../geom-utils';
 
-interface IRectangleCollections extends IGeometry {
+interface IRectangleCollectionsSnapshot extends IRecoverableSnapshot {
   id: number;
   collection: Rectangle[];
+  recover(): void;
 }
 
 export class RectangleCollections extends Geometry {
@@ -22,10 +25,20 @@ export class RectangleCollections extends Geometry {
     }
   }
 
-  snapshot(): IRectangleCollections {
+  snapshot(): IRectangleCollectionsSnapshot {
+    const collectionSnapshot = [...this.collection.iterate()];
+    const rectanglesSnapshots = [...map(this.collection.iterate(), (rectangle) => rectangle.snapshot())];
+    const pointsSnapshots = [...map(pointIterator(this), (point) => point.snapshot())];
+
     return {
       id: this.id,
-      collection: [...this.collection.iterate()],
+      collection: collectionSnapshot,
+      recover: () => {
+        this.collection.clear();
+        this.collection.append(...collectionSnapshot);
+        rectanglesSnapshots.forEach((snapshot) => snapshot.recover());
+        pointsSnapshots.forEach((snapshot) => snapshot.recover());
+      },
     };
   }
 }

@@ -21,7 +21,7 @@ export class Observable<T> {
 }
 
 window.DEBOUNCE_TIME = 1;
-export function debounce<T>(cb: (value: T) => void) {
+export function debounce<T>(cb: (value: T) => void, t = window.DEBOUNCE_TIME) {
   let lock = false;
   return (value: T) => {
     if (lock) {
@@ -32,6 +32,6 @@ export function debounce<T>(cb: (value: T) => void) {
     setTimeout(() => {
       cb(value);
       lock = false;
-    }, window.DEBOUNCE_TIME);
+    }, t);
   };
 }
