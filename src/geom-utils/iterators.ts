@@ -1,4 +1,4 @@
-import {Rectangle, RectangleCollections, Coord, Point, Geometry} from 'geoms';
+import {Rectangle, RectangleCollections, Point, Geometry} from 'geoms';
 
 export function* pointIterator(geom: Geometry): IterableIterator<Point> {
   if (geom instanceof Rectangle) {
@@ -14,13 +14,13 @@ export function* pointIterator(geom: Geometry): IterableIterator<Point> {
   }
 }
 
-export function* edgeIterator(geom: Geometry): IterableIterator<[Coord, Coord]> {
+export function* edgeIterator(geom: Geometry): IterableIterator<[Point, Point]> {
   if (geom instanceof Rectangle) {
     const points = [...geom.points.iterate()];
     for (let i = 1; i < points.length; i++) {
-      yield [points[i - 1].coord, points[i].coord];
+      yield [points[i - 1], points[i]];
     }
-    yield [points[points.length - 1].coord, points[0].coord];
+    yield [points[points.length - 1], points[0]];
   } else if (geom instanceof RectangleCollections) {
     for (let rectangle of geom.collection.iterate()) {
       yield* edgeIterator(rectangle);

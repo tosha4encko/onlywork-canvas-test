@@ -3,7 +3,6 @@ import {Rectangle, Coord} from 'geoms';
 import {pointIterator} from './iterators';
 
 const EPS = 7;
-//todo каррирование?
 export function equelPoints([x1, y1]: Coord, [x2, y2]: Coord) {
   return Math.abs(x1 - x2) < EPS && Math.abs(y1 - y2) < EPS;
 }
@@ -23,4 +22,8 @@ export function getCenter(rectangle: Rectangle): Coord {
 
 export function sign([x0, y0]: Coord, [[x1, y1], [x2, y2]]: [Coord, Coord]) {
   return Math.sign((y0 - y1) / (y2 - y1) - (x0 - x1) / (x2 - x1));
+}
+
+export function dist([x1, y1]: Coord, [x2, y2]: Coord) {
+  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }

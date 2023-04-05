@@ -1,7 +1,8 @@
 import {ui} from 'ui';
-import {Render} from 'render';
+import {Render, RenderCursor} from 'renderer';
 import {RectangleCollections, Rectangle} from 'geoms';
 import {SnapshotCaretaker, HoverGeomHandler, MoveGeomHandler} from 'user-activity';
+import {ChangeContourHandler} from './user-activity/change-contour-handler';
 
 declare global {
   interface Window {
@@ -19,7 +20,9 @@ function main() {
 
   new HoverGeomHandler(rectangleCollection, activeGeomCollection);
   new MoveGeomHandler(rectangleCollection);
+  new ChangeContourHandler(rectangleCollection);
   new Render(rectangleCollection, activeGeomCollection);
+  new RenderCursor(rectangleCollection);
   const snapshotCaretaker = new SnapshotCaretaker(rectangleCollection);
 
   ui.prevButton.addEventListener('click', () => {

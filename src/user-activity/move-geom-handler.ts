@@ -14,7 +14,6 @@ export class MoveGeomHandler {
   }
 
   private _mouseDownHandler = ({x, y}: MouseEvent) => {
-    this._activeGeom = getIntersectionGeom(this._geomCollection, [x, y]);
     this._clickPoint = [x, y];
   };
 
@@ -24,11 +23,18 @@ export class MoveGeomHandler {
   };
 
   private _moveListener = (ev: MouseEvent) => {
-    if (this._clickPoint === undefined || this._activeGeom === undefined) {
+    const {x: x0, y: y0} = ev;
+    if (this._clickPoint === undefined) {
       return;
     }
 
-    const {x: x0, y: y0} = ev;
+    if (this._activeGeom === undefined) {
+      this._activeGeom = getIntersectionGeom(this._geomCollection, [x0, y0]);
+      if (this._activeGeom === undefined) {
+        return;
+      }
+    }
+
     const [x, y] = this._clickPoint;
     const [xM, yM] = [x - x0, y - y0];
     this._clickPoint = [x0, y0];

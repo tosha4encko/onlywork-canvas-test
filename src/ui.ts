@@ -13,6 +13,10 @@ class UI {
     dirtyCanvas.width = window.innerWidth * 0.75;
     dirtyCanvas.height = window.innerHeight;
 
+    const tempPointCanvas: HTMLCanvasElement = document.querySelector('#temp-point-canvas');
+    tempPointCanvas.width = window.innerWidth * 0.75;
+    tempPointCanvas.height = window.innerHeight;
+
     // todo хорошо бы еще проверять типы
     if (!addButton || !deleteButton || !canvas) {
       throw new Error('ui is not defined');
@@ -23,6 +27,7 @@ class UI {
     this.nextButton = nextButton;
     this.canvas = canvas;
     this.dirtyCanvas = dirtyCanvas;
+    this.tempPointCanvas = tempPointCanvas;
   }
 
   readonly addButton: HTMLButtonElement;
@@ -31,6 +36,7 @@ class UI {
   readonly nextButton: HTMLButtonElement;
   readonly canvas: HTMLCanvasElement;
   readonly dirtyCanvas: HTMLCanvasElement;
+  readonly tempPointCanvas: HTMLCanvasElement;
 }
 
 export const ui = new UI();
