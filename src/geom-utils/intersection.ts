@@ -1,5 +1,5 @@
 import {Geometry, Coord, Rectangle, Point} from 'geoms';
-import {dist, equelPoints, getCenter, sign} from 'geom-utils';
+import {dist, equelPoints, map} from 'geom-utils';
 
 import {edgeIterator, ever, find, pointIterator, rectangleIterator} from './iterators';
 
@@ -21,13 +21,60 @@ export function getIntersectionPoint(geom: Geometry, [x, y]: Coord) {
 
 export function getIntersectionRectangle<T extends Geometry>(geom: T, [x, y]: Coord): Rectangle | undefined {
   return find(rectangleIterator(geom), (rectangle) => {
-    const center = getCenter(rectangle);
-    const isOneSide = ([p1, p2]: [Point, Point]) =>
-      sign([x, y], [p1.coord, p2.coord]) === sign(center, [p1.coord, p2.coord]);
-
-    return ever(edgeIterator(rectangle), isOneSide);
+    return pointInPolygon([x,y], [...map(rectangle.points.iterate(), point => point.coord)])
   });
 }
+
+
+// chatGPT code
+function pointInPolygon(point: Coord, polygon: Coord[]): boolean {
+  const [x, y] = point;
+  let inside = false;
+
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const pi = polygon[i];
+    const pj = polygon[j];
+
+    if (isPointOnBoundary(y, pi, pj)) {
+      return true;
+    }
+    if (isPointOnEdge(x, y, pi, pj)) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
+}
+
+function isPointOnBoundary(y: number, pi: Coord, pj: Coord): boolean {
+  return isHorizontalEdge(y, pi, pj) && isXInRange(pi, pj, y);
+}
+
+function isPointOnEdge(x: number, y: number, pi: Coord, pj: Coord): boolean {
+  return isYInRange(y, pi, pj) && isXLeftOfIntersection(x, y, pi, pj);
+}
+
+function isHorizontalEdge(y: number, pi: Coord, pj: Coord): boolean {
+  return pi[1] === y || pj[1] === y;
+}
+
+function isXInRange(pi: Coord, pj: Coord, y: number): boolean {
+  const [x1, y1] = pi;
+  const [x2, y2] = pj;
+  const x = ((y - y1) * (x2 - x1)) / (y2 - y1) + x1;
+  return x1 < x2 ? x1 <= x && x <= x2 : x2 <= x && x <= x1;
+}
+
+function isYInRange(y: number, pi: Coord, pj: Coord): boolean {
+  return (pi[1] <= y && y < pj[1]) || (pj[1] <= y && y < pi[1]);
+}
+
+function isXLeftOfIntersection(x: number, y: number, pi: Coord, pj: Coord): boolean {
+  const [x1, y1] = pi;
+  const [x2, y2] = pj;
+  return x < ((x2 - x1) * (y - y1)) / (y2 - y1) + x1;
+}
+
 
 const EPS = 1;
 export function getIntersectionEdges(rect: Rectangle, p0: Coord, eps = EPS): [Point, Point] | undefined {

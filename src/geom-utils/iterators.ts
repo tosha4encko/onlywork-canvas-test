@@ -53,7 +53,7 @@ export function* filter<T>(generator: IterableIterator<T>, predicat: (value: T) 
   }
 }
 
-export function ever<T>(generator: IterableIterator<T>, predicat: (value: T) => boolean) {
+export function ever<T>(generator: Iterable<T>, predicat: (value: T) => boolean) {
   for (let item of generator) {
     if (!predicat(item)) {
       return false;
