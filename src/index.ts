@@ -17,13 +17,14 @@ declare global {
 function main() {
   const rectangleCollection = new RectangleCollections();
   const activeGeomCollection = new RectangleCollections();
+  const snapshotCaretaker = new SnapshotCaretaker(rectangleCollection);
 
+  // todo garbage-collect
   new HoverGeomHandler(rectangleCollection, activeGeomCollection);
-  new MoveGeomHandler(rectangleCollection);
-  new ChangeContourHandler(rectangleCollection);
+  new MoveGeomHandler(rectangleCollection, snapshotCaretaker);
+  new ChangeContourHandler(rectangleCollection, snapshotCaretaker);
   new Render(rectangleCollection, activeGeomCollection);
   new RenderCursor(rectangleCollection);
-  const snapshotCaretaker = new SnapshotCaretaker(rectangleCollection);
 
   ui.prevButton.addEventListener('click', () => {
     snapshotCaretaker.prev();
@@ -40,6 +41,7 @@ function main() {
         [200, 50],
       ]),
     );
+    snapshotCaretaker.record();
   });
 
   ui.deleteButton.addEventListener('click', () => {

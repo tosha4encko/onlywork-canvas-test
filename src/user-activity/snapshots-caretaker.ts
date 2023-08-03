@@ -1,8 +1,4 @@
-import {Geometry, Rectangle, RectangleCollections} from 'geoms';
-import {debounce} from 'observable';
-import {ReactiveCollectionFires} from 'reactive-colection';
-import {ui} from '../ui';
-import {forEach, getIntersectionGeom} from '../geom-utils';
+import {RectangleCollections} from 'geoms';
 
 export interface IRecoverableSnapshot {
   id: number;
@@ -17,33 +13,21 @@ interface HistoryNode {
 
 export class SnapshotCaretaker {
   private _currentNode: HistoryNode | null;
-  private _activeGeom?: Geometry;
   private _mute = false;
-  private _needSnapshot = false;
 
-  constructor(private _geomCollection: RectangleCollections, reactionArea = ui.canvas) {
-    reactionArea.addEventListener('mousedown', this._mouseDownHandler);
-    reactionArea.addEventListener('mouseup', this._mouseUpHandler);
-
-    // todo garbage collect
-    this.add(this._geomCollection.snapshot());
-    this._geomCollection.collection.subscribe(() => this.add(this._geomCollection.snapshot()));
-
-    forEach(this._geomCollection.collection.iterate(), this._subscribeToRectangle);
-    this._geomCollection.collection.subscribe(({type, objId}) => {
-      // todo что-то делать с другими экшенами
-      if (type === ReactiveCollectionFires.Append) {
-        const rectangle = this._geomCollection.collection.get(objId);
-        this._subscribeToRectangle(rectangle);
-      }
-    });
+  constructor(private _geomCollection: RectangleCollections) {
+    this.record();
   }
 
-  add(snapshot: IRecoverableSnapshot) {
+  record() {
     if (!this._mute) {
+      const snapshot = this._geomCollection.snapshot();
       const newNode: HistoryNode = {recover: snapshot.recover, prev: this._currentNode, next: null};
       this._currentNode && (this._currentNode.next = newNode);
       this._currentNode = newNode;
+
+      this._mute = true;
+      setTimeout(() => (this._mute = false), 100);
     }
   }
 
@@ -66,24 +50,4 @@ export class SnapshotCaretaker {
       this._currentNode.recover();
     }
   }
-
-  private _mouseDownHandler = ({x, y}: MouseEvent) => {
-    this._activeGeom = getIntersectionGeom(this._geomCollection, [x, y]);
-  };
-
-  private _mouseUpHandler = () => {
-    if (this._activeGeom !== undefined && this._needSnapshot) {
-      this.add(this._geomCollection.snapshot());
-      this._needSnapshot = false;
-    }
-
-    this._activeGeom = undefined;
-  };
-
-  private _subscribeToRectangle = (rectangle: Rectangle) => {
-    rectangle.points.subscribe(debounce(() => this.add(rectangle.snapshot())));
-    for (const point of rectangle.points.iterate()) {
-      point.subscribe(debounce(() => (this._needSnapshot = true)));
-    }
-  };
 }

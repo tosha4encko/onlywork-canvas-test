@@ -1,7 +1,6 @@
 import {ReactiveCollection} from 'reactive-colection';
 import {Rectangle, Geometry, Coord} from '.';
 import {IRecoverableSnapshot} from 'user-activity/snapshots-caretaker';
-import {map, pointIterator} from '../geom-utils';
 
 interface IRectangleCollectionsSnapshot extends IRecoverableSnapshot {
   id: number;
@@ -26,18 +25,16 @@ export class RectangleCollections extends Geometry {
   }
 
   snapshot(): IRectangleCollectionsSnapshot {
-    const collectionSnapshot = [...this.collection.iterate()];
-    const rectanglesSnapshots = [...map(this.collection.iterate(), (rectangle) => rectangle.snapshot())];
-    const pointsSnapshots = [...map(pointIterator(this), (point) => point.snapshot())];
+    const collection = [...this.collection.iterate()];
+    const rectanglesSnapshots = collection.map(rectangle => rectangle.snapshot());
 
     return {
       id: this.id,
-      collection: collectionSnapshot,
+      collection: collection,
       recover: () => {
         this.collection.clear();
-        this.collection.append(...collectionSnapshot);
+        this.collection.append(...collection);
         rectanglesSnapshots.forEach((snapshot) => snapshot.recover());
-        pointsSnapshots.forEach((snapshot) => snapshot.recover());
       },
     };
   }

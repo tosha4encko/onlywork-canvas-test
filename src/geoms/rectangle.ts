@@ -25,13 +25,16 @@ export class Rectangle extends Geometry {
   }
 
   snapshot(): IRectangleSnapshot {
-    const pointsSnapshot = [...this.points.iterate()];
+    const points = [...this.points.iterate()];
+    const snapshots = points.map(point => point.snapshot())
+
     return {
       id: this.id,
-      points: pointsSnapshot,
+      points: points,
       recover: () => {
         this.points.clear();
-        this.points.append(...pointsSnapshot);
+        this.points.append(...points);
+        snapshots.forEach(snapshot => snapshot.recover())
       },
     };
   }

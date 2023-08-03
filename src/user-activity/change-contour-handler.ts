@@ -1,9 +1,14 @@
 import {Point, Rectangle, RectangleCollections} from 'geoms';
 import {ui} from 'ui';
 import {getIntersectionEdges, getIntersectionPoint, getNearestPointOnEdge} from 'geom-utils';
+import {SnapshotCaretaker} from './snapshots-caretaker';
 
 export class ChangeContourHandler {
-  constructor(private _geomCollection: RectangleCollections, private _reactionArea = ui.canvas) {
+  constructor(
+    private _geomCollection: RectangleCollections, 
+    private _snapshotCaretaker: SnapshotCaretaker,
+    private _reactionArea = ui.canvas
+  ) {
     this._reactionArea.addEventListener('mousedown', this._mouseDownHandler);
   }
 
@@ -22,6 +27,7 @@ export class ChangeContourHandler {
       const [p1, p2] = edge;
       const pointForPushOnEdge = getNearestPointOnEdge([p1.coord, p2.coord], [x, y]);
       this._pushPointIntoEdge(new Point(pointForPushOnEdge), edge, rectangle);
+      this._snapshotCaretaker.record()
 
       return;
     }
